@@ -6,3 +6,10 @@ build
 #variables de entorno
 .env*
 !.env.template
+/generated/prisma
+
+/src/generated/prisma
+
+/src/generated/prisma
+
+/src/generated/prisma

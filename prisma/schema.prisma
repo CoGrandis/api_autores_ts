@@ -1,0 +1,40 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model autores {
+  id   Int     @id @default(autoincrement())
+  name String? @db.VarChar(255)
+  pais String? @db.VarChar(255)
+}
+
+model categoria {
+  id        Int     @id @default(autoincrement())
+  categoria String
+  libro     libro[]
+}
+
+model libro {
+  id          Int        @id @default(autoincrement())
+  titulo      String?    @db.VarChar(255)
+  user_id     Int?
+  categoriaId Int?
+  categoria   categoria? @relation(fields: [categoriaId], references: [id])
+  user        user?      @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "libro_ibfk_1")
+
+  @@index([categoriaId], map: "libro_categoriaId_fkey")
+  @@index([user_id], map: "user_id")
+}
+
+model user {
+  id       Int     @id @default(autoincrement())
+  email    String?
+  username String?
+  password String
+  libro    libro[]
+}
