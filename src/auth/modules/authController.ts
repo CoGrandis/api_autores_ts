@@ -36,6 +36,7 @@ const loginUser =  async (req:Request, res:Response) => {
 
         }
         var token = jwt.sign({ id: result.id, username : result.username }, privateKey, { expiresIn: '1h' });
+        res.cookie('authcookie',token,{maxAge:3600000 ,httpOnly:true}) 
         res.json({token:`Bearer ${token}`}) 
        
 
