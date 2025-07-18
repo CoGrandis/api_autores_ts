@@ -10,7 +10,7 @@ const bodyParamsSchema = z.object({
 });
 
 const queryParamsSchema= z.object({
-  page: z.coerce.number({error:"Debe ingresar un numero entero"}).int().min(1,"Debe ingresar un número mayor a 0").optional(),
+  page: z.coerce.number({error:"Debe ingresar un numero entero"}).int().optional(),
 });
 
 export {routeParamsSchema, bodyParamsSchema, queryParamsSchema}

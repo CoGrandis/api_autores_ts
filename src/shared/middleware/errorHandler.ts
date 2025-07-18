@@ -1,8 +1,15 @@
 import CustomError from '../utils/CustomError'
 import { Request, Response, NextFunction } from 'express';
 
-function errorHandler(err:CustomError, req:Request, res:Response, next:NextFunction){
-    const bodyResponse={
+interface BodyResponse{
+    timestamp:Date;
+    method:string;
+    statusCode:number;
+    message:string
+}
+
+function errorHandler(err:any, req:Request, res:Response, next:NextFunction){
+    const bodyResponse:BodyResponse={
         timestamp:new Date(),
         method: req.method,
         statusCode:500,
@@ -12,7 +19,7 @@ function errorHandler(err:CustomError, req:Request, res:Response, next:NextFunct
         bodyResponse.statusCode = err.status
         bodyResponse.message = err.message
     }
-    res.status(err.status).json(bodyResponse)
+    res.status(bodyResponse.statusCode).json(bodyResponse)
 }
 
 export {errorHandler}

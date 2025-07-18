@@ -1,12 +1,13 @@
+import CustomError from "@utils/CustomError";
 import { Libro, libroModel } from "./libroModel";
 import { Response, Request } from "express";
 import { env } from "src/env";
 const getLibros = async (req: Request, res: Response) => {
     try{
-        // const limit = env.PAGE_SIZE
-        // const {page} = req.query ?? 1
-        // const offset = (page-1)* limit
-        const libros = await libroModel.getAll();
+        const limit:number= env.PAGE_SIZE
+        const page= req.query.page ?? 1
+        const offset:number = (parseInt(page as string)-1)*limit
+        const libros = await libroModel.getAll(limit, offset);
         res.status(200).json(libros);
     }catch(err){
         if(err instanceof Error){
@@ -38,14 +39,12 @@ const insertLibro = async (req: Request, res: Response) => {
 const deleteLibro = async (req: Request, res: Response) => {
     try {
         const {id} =  req.params
-        const libros = await  libroModel.deleteLibro(parseInt(id))
-        console.log(libros)
-        res.status(204)
+        const libros = await libroModel.deleteLibro(parseInt(id))
+        res.status(200).json(libros)
     } catch (err) {
         if(err instanceof Error){
-            res.status(401).json({error: err.message})
+            throw new CustomError(err.message,400)
         }
-        res.status(500).json({error: "Error 500"})
     }
 }
 

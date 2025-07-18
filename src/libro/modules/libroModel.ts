@@ -7,9 +7,8 @@ interface Libro {
     user_id:number;
 }
 
-const getAll = async()=>{
-    const [rows] = await prisma.libro.findMany({select:{titulo:true, categoria:true, user:true}})
-    return rows
+const getAll = async(limit:number, offset:number)=>{
+    return await prisma.libro.findMany({select:{titulo:true, categoria:true, user:{select:{username:true}}}, skip:offset, take:limit})
 }
 
 const insertLibro = async (libro:Libro) => {
@@ -23,8 +22,7 @@ const insertLibro = async (libro:Libro) => {
 }
 
 const deleteLibro = async (id:number) => {
-    const rows:{}= await prisma.libro.delete({where:{id}})
-    return rows
+    return await prisma.libro.delete({where:{id}})
 }
 
 const updateLibro = async (libro:Libro, id:number) => {
