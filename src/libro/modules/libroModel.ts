@@ -1,6 +1,4 @@
-import { dbpromise } from "../../config/db";
 import { prisma } from "../../database/prisma";
-const db = dbpromise;
 interface Libro {
     titulo: string;
     categoriaId: number;

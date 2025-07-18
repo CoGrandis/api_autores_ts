@@ -3,7 +3,6 @@ import { Response, Request } from "express";
 import { env } from "src/env";
 import bcrypt from "bcrypt";
 import jwt from 'jsonwebtoken';
-import { prisma } from "src/database/prisma";
 import CustomError from "@utils/CustomError";
 
 const privateKey = env.PRIVATE_KEY;
