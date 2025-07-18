@@ -59,6 +59,7 @@ const updateLibro = async (req: Request, res: Response) => {
             user_id:user_id
         }
         const libros= await libroModel.updateLibro(libro, parseInt(id))
+        
         res.status(201).json(libros)
     } catch (err) {
         if(err instanceof Error){
