@@ -5,7 +5,8 @@ import { verify } from 'jsonwebtoken';
 
 const privateKey = env.PRIVATE_KEY
 function verifyToken (req:Request, res:Response, next:NextFunction ) {
-    const headerAuth = req.headers['authorization']
+    const headerAuth = req.cookies['token']
+    console.log(req.cookies)
     if(!headerAuth){
         throw new CustomError("Debe ingresar Token", 401);    
 

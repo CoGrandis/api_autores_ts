@@ -36,6 +36,10 @@ const loginUser =  async (req:Request, res:Response) => {
 
         }
         var token = jwt.sign({ id: result.id, username : result.username }, privateKey, { expiresIn: '1h' });
+        res.cookie('token', `Bearer ${token}`, {
+            httpOnly: true,
+        })
+        console.log(req.cookies)   
         res.json({token:`Bearer ${token}`}) 
        
 
