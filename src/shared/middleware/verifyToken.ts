@@ -1,31 +1,27 @@
 import { env } from 'src/env';
 import { Request, Response, NextFunction } from 'express';
 import CustomError from '../utils/CustomError';
-import { verify } from 'jsonwebtoken';
-
+import {verify, JwtPayload} from 'jsonwebtoken';
 const privateKey = env.PRIVATE_KEY
 function verifyToken (req:Request, res:Response, next:NextFunction ) {
-    const headerAuth = req.headers['authorization']
-    if(!headerAuth){
-        throw new CustomError("Debe ingresar Token", 401);    
+        const cookieAuth = req.cookies['accessToken']        
+        if(!cookieAuth){
+            throw new CustomError("Debe ingresar Token", 403);    
 
-    }
-    const token = headerAuth.split(' ')[1];
-    const tokenStart = headerAuth.split(' ')[0];
-    
-    if(!token){
-        throw new CustomError("Token no Valido", 401);    
-    }
-    if(tokenStart != "Bearer"){
-        throw new CustomError("Token no Valido", 401);
-    }
-    const verifyToken = verify(token,privateKey)
-    if(verifyToken){
-        next()   
-    }else{
-        throw new CustomError("Token no Valido", 401);
-    }
- 
+        }
+        const token = cookieAuth.split(' ')[1];
+        const tokenStart = cookieAuth.split(' ')[0];
+        
+        if(!token || tokenStart != "Bearer"){
+            throw new CustomError("Token no Valido", 401);    
+        }
+        const verifyToken = verify(token,privateKey)
+        if(verifyToken){
+            next()   
+        }else{
+           throw new CustomError("Token no Valido", 401);    
+        }
+
     
 
 }

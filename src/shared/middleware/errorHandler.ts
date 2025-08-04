@@ -1,3 +1,4 @@
+import { TokenExpiredError } from 'jsonwebtoken';
 import CustomError from '../utils/CustomError'
 import { Request, Response, NextFunction } from 'express';
 
@@ -17,6 +18,10 @@ function errorHandler(err:any, req:Request, res:Response, next:NextFunction){
     }
     if(err instanceof CustomError){
         bodyResponse.statusCode = err.status
+        bodyResponse.message = err.message
+    }
+    if(err instanceof TokenExpiredError){
+        bodyResponse.statusCode = 401
         bodyResponse.message = err.message
     }
     res.status(bodyResponse.statusCode).json(bodyResponse)
