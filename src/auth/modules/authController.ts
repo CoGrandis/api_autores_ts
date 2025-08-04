@@ -24,25 +24,29 @@ const registerUser = async(req:Request, res:Response)=>{
 }
 
 const loginUser =  async (req:Request, res:Response) => {
-        const username:string = req.body.username
-        const password = req.body.password
-        const result = await authModels.logUser(username)
-        if(!result){
-            throw new CustomError("Usuario no encontrado",404)
-        }
-        const verificarContraseña = await bcrypt.compare(password, result.password)
-        if(!verificarContraseña){
-            throw new CustomError("Contraseña incorrecta",401)
+    const username:string = req.body.username
+    const password = req.body.password
+    const result = await authModels.logUser(username)
+    if(!result){
+        throw new CustomError("Usuario no encontrado",404)
+    }
+    const verificarContraseña = await bcrypt.compare(password, result.password)
+    if(!verificarContraseña){
+        throw new CustomError("Contraseña incorrecta",401)
 
-        }
-        var token = jwt.sign({ id: result.id, username : result.username }, privateKey, { expiresIn: '1h' });
-        res.cookie('token', `Bearer ${token}`, {
-            httpOnly: true,
-        })
-        console.log(req.cookies)   
-        res.json({token:`Bearer ${token}`}) 
-       
+    }
+    var token = jwt.sign({ id: result.id, username : result.username }, privateKey, { expiresIn: '15m' });
 
+    const refreshToken = jwt.sign({ id: result.id, username : result.username }, privateKey, { expiresIn: '7d' });
+
+    res.cookie('token', `Bearer ${token}`, {
+        httpOnly: true,
+        maxAge:1000*60*15,
+    })
+    console.log(req.cookies)   
+    res.json({token:`Bearer ${token}`}) 
+
+    
 }
 export const authController = {
     registerUser, 
