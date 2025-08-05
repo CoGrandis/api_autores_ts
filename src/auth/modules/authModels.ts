@@ -9,7 +9,6 @@ interface User{
 interface RefreshToken{
     user_id:number;
     expires_at:Date;
-    token:string;
 }
 
 const registerUser = async (user:User) => {
@@ -32,17 +31,20 @@ const addAuthToken = async(refreshToken:RefreshToken)=>{
         data:{
             user_id:refreshToken.user_id,
             expires_at:refreshToken.expires_at,
-            token:refreshToken.token
-
+            token:""
         }
     })
     return rows
 }
-
+const deleteSession = async(id:number)=>{
+    const rows = await prisma.authToken.delete({where:{id:id}})
+    return rows
+}
 const authModels ={
     registerUser,
     logUser,
-    addAuthToken
+    addAuthToken,
+    deleteSession,
 }
 
 export {User,RefreshToken, authModels }

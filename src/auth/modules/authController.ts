@@ -1,9 +1,10 @@
-import { User, authModels, RefreshToken } from "./authModels";
+import { User, authModels, RefreshToken} from "./authModels";
 import { Response, Request } from "express";
 import { env } from "src/env";
 import bcrypt from "bcrypt";
-import jwt from 'jsonwebtoken';
+import jwt, { verify , JwtPayload} from 'jsonwebtoken';
 import CustomError from "@utils/CustomError";
+import tr from "zod/v4/locales/tr.cjs";
 
 const privateKey = env.PRIVATE_KEY;
 const registerUser = async(req:Request, res:Response)=>{
@@ -35,18 +36,18 @@ const loginUser =  async (req:Request, res:Response) => {
         throw new CustomError("Contraseña incorrecta",401)
 
     }
-    const accessToken = jwt.sign({ id: result.id, username : result.username }, privateKey, { expiresIn: '15m' });
-
-    const refreshToken = jwt.sign({ id: result.id }, privateKey, { expiresIn: '2d' });
     const expires:Date = new Date();
     expires.setDate(expires.getDate()+2)
     const authToken:RefreshToken={
         user_id:result.id,
-        token:refreshToken,
         expires_at: expires 
     }
+    const session = await authModels.addAuthToken(authToken)
 
-    await authModels.addAuthToken(authToken)
+
+    const accessToken = jwt.sign({ id: result.id, username : result.username }, privateKey, { expiresIn: '15m' });
+    const refreshToken = jwt.sign({ id: session.id }, privateKey, { expiresIn: '2d' });
+
 
     res.cookie('accessToken', `Bearer ${accessToken}`, {
         httpOnly: true,
@@ -60,7 +61,24 @@ const loginUser =  async (req:Request, res:Response) => {
     res.json({Access_Token:`Bearer ${accessToken}`}) 
 
 }
+
+const logoutUser = async (req:Request, res:Response) => {
+    const accessToken = req.cookies["accessToken"];
+    const refreshToken = req.cookies["refreshToken"].split(' ')[1];
+    try {
+    const payload =verify(refreshToken, privateKey) as JwtPayload;
+    console.log(payload)
+    const id = payload.id
+    await authModels.deleteSession(id);
+    res.clearCookie('accessToken', { httpOnly: true }); 
+    res.clearCookie('refreshToken', { httpOnly: true });
+    res.status(200).json({message:"Sesión cerrada correctamente"})        
+    } catch (error:any) {
+        console.log(error)
+    }
+}
 export const authController = {
     registerUser, 
-    loginUser
+    loginUser,
+    logoutUser
 }
