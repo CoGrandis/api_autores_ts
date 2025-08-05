@@ -37,14 +37,15 @@ model user {
   username String?
   password String
   libro    libro[]
-  authToken authToken[]
+  Session Session[]
 }
 
-model authToken {
+model Session {
   id Int @id @default(autoincrement())
   user_id Int
   user user @relation(fields: [user_id], references: [id])
-  token String
   created_at DateTime @default(now())
   expires_at DateTime
+  status String
+  user_ip String?
 }

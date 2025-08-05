@@ -1,11 +1,10 @@
-import { User, authModels, RefreshToken} from "./authModels";
+import { Session, User, authModels} from "./authModels";
 import { Response, Request } from "express";
 import { env } from "src/env";
 import bcrypt from "bcrypt";
 import jwt, { verify , JwtPayload} from 'jsonwebtoken';
 import CustomError from "@utils/CustomError";
-import tr from "zod/v4/locales/tr.cjs";
-
+0
 const privateKey = env.PRIVATE_KEY;
 const registerUser = async(req:Request, res:Response)=>{
     try {
@@ -27,55 +26,56 @@ const registerUser = async(req:Request, res:Response)=>{
 const loginUser =  async (req:Request, res:Response) => {
     const username:string = req.body.username
     const password = req.body.password
-    const result = await authModels.logUser(username)
-    if(!result){
+    const user = await authModels.logUser(username)
+    if(!user){
         throw new CustomError("Usuario no encontrado",404)
     }
-    const verificarContraseña = await bcrypt.compare(password, result.password)
+    const verificarContraseña = await bcrypt.compare(password, user.password)
     if(!verificarContraseña){
         throw new CustomError("Contraseña incorrecta",401)
 
     }
+    console.log(req.ip)
+    console.log(req.originalUrl)
+
     const expires:Date = new Date();
-    expires.setDate(expires.getDate()+2)
-    const authToken:RefreshToken={
-        user_id:result.id,
-        expires_at: expires 
+    expires.setDate(expires.getDate()+7)
+
+    const newSession:Session={
+        expires_at:expires,
+        status:"Active",
+        user_id: user.id
     }
-    const session = await authModels.addAuthToken(authToken)
+    const session = await authModels.createSession(newSession)
 
-
-    const accessToken = jwt.sign({ id: result.id, username : result.username }, privateKey, { expiresIn: '15m' });
-    const refreshToken = jwt.sign({ id: session.id }, privateKey, { expiresIn: '2d' });
-
+    const accessToken = jwt.sign({ id: user.id, username : user.username }, privateKey, { expiresIn: '10s' });
+    const refreshToken = jwt.sign({ id: session.id, user_id:user.id }, privateKey, { expiresIn: '2d' });
 
     res.cookie('accessToken', `Bearer ${accessToken}`, {
         httpOnly: true,
         maxAge:1000*60*5,
     })
-    res.cookie('refreshToken', `Bearer ${refreshToken}`, {
-        httpOnly: true,
-        maxAge:1000*60*60*48,
-    })
+    res.cookie('refreshToken', `Bearer ${refreshToken}`, {httpOnly: true,maxAge:1000*60*60*48,})
 
     res.json({Access_Token:`Bearer ${accessToken}`}) 
 
 }
 
 const logoutUser = async (req:Request, res:Response) => {
-    const accessToken = req.cookies["accessToken"];
-    const refreshToken = req.cookies["refreshToken"].split(' ')[1];
-    try {
-    const payload =verify(refreshToken, privateKey) as JwtPayload;
+    const refreshToken = req.cookies["refreshToken"];
+    if(!refreshToken){
+        throw new CustomError('No se pudo cerrar sesión correctamente', 400 )
+    }
+    
+    const token = refreshToken.split(' ')[1];
+    const payload =verify(token, privateKey) as JwtPayload;
     console.log(payload)
     const id = payload.id
-    await authModels.deleteSession(id);
+
     res.clearCookie('accessToken', { httpOnly: true }); 
     res.clearCookie('refreshToken', { httpOnly: true });
+ 
     res.status(200).json({message:"Sesión cerrada correctamente"})        
-    } catch (error:any) {
-        console.log(error)
-    }
 }
 export const authController = {
     registerUser, 

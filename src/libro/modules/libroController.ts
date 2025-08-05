@@ -18,7 +18,6 @@ const getLibros = async (req: Request, res: Response) => {
 }
 const insertLibro = async (req: Request, res: Response) => {
     try {
-        console.log(req.body)
         const {titulo, categoriaId, user_id} = req.body
         const libro:Libro = {
             titulo:titulo,

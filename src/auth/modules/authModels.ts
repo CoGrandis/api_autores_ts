@@ -6,9 +6,10 @@ interface User{
     password:string;
 }
 
-interface RefreshToken{
+interface Session{
     user_id:number;
     expires_at:Date;
+    status:string;
 }
 
 const registerUser = async (user:User) => {
@@ -26,25 +27,30 @@ const logUser = async (username:string) => {
     const rows = await prisma.user.findFirst({where:{username:username}})
     return rows
 }
-const addAuthToken = async(refreshToken:RefreshToken)=>{
-    const rows = await prisma.authToken.create({
+const createSession = async(session:Session)=>{
+    const rows = await prisma.session.create({
         data:{
-            user_id:refreshToken.user_id,
-            expires_at:refreshToken.expires_at,
-            token:""
+            user_id:session.user_id,
+            expires_at:session.expires_at,
+            status:session.status
         }
     })
     return rows
 }
 const deleteSession = async(id:number)=>{
-    const rows = await prisma.authToken.delete({where:{id:id}})
+    const rows = await prisma.session.delete({where:{id:id}})
+    return rows
+}
+
+const getSession = async (id:number) => {
+    const rows = await prisma.session.findFirst({where:{id:id}})
     return rows
 }
 const authModels ={
     registerUser,
     logUser,
-    addAuthToken,
-    deleteSession,
+    createSession,
+    getSession,
+    
 }
-
-export {User,RefreshToken, authModels }
+export {User, Session, authModels }
