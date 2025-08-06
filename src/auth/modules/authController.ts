@@ -17,9 +17,11 @@ const registerUser = async(req:Request, res:Response)=>{
             password:hashedPassword
         }
         const result = await authModels.registerUser(user)
-        res.status(200).json(result)
+        res.status(200).json({message:"Usuario Registrado Correctamente"})
     } catch (error) {
-        console.log(error)
+        if(error instanceof Error){
+            throw new CustomError(error.message,500)
+        }
     }
 }
 
@@ -35,8 +37,6 @@ const loginUser =  async (req:Request, res:Response) => {
         throw new CustomError("Contraseña incorrecta",401)
 
     }
-    console.log(req.ip)
-    console.log(req.originalUrl)
 
     const expires:Date = new Date();
     expires.setDate(expires.getDate()+7)
@@ -52,13 +52,9 @@ const loginUser =  async (req:Request, res:Response) => {
     const accessToken = jwt.sign({ id: user.id, username : user.username }, privateKey, { expiresIn: '10s' });
     const refreshToken = jwt.sign({ id: session.id, user_id:user.id }, privateKey, { expiresIn: '2d' });
 
-    res.cookie('accessToken', `Bearer ${accessToken}`, {
-        httpOnly: true,
-        maxAge:1000*60*5,
-    })
-    res.cookie('refreshToken', `Bearer ${refreshToken}`, {httpOnly: true,maxAge:1000*60*60*48,})
-
-    res.json({Access_Token:`Bearer ${accessToken}`}) 
+    res.cookie('accessToken', `Bearer ${accessToken}`, {httpOnly: true,sameSite: true})
+    res.cookie('refreshToken', `Bearer ${refreshToken}`, {httpOnly: true,sameSite: true})
+    res.json({message:"Sesion Iniciada Correctamente"}) 
 
 }
 
@@ -66,14 +62,15 @@ const logoutUser = async (req:Request, res:Response) => {
     const refreshToken = req.cookies["refreshToken"].split(' ')[1];
     try {
     const payload =verify(refreshToken, privateKey) as JwtPayload;
-    console.log(payload)
     const id = payload.id
     await authModels.deleteSession(id);
     res.clearCookie('accessToken', { httpOnly: true }); 
     res.clearCookie('refreshToken', { httpOnly: true });
     res.status(200).json({message:"Sesión cerrada correctamente"})        
     } catch (error:any) {
-        console.log(error)
+        if(error instanceof Error){
+            throw new CustomError(error.message,500)
+        }
     }       
 }
 export const authController = {

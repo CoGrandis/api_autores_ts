@@ -13,6 +13,11 @@ interface Session{
     status:string;
 }
 
+interface UpdateSession{
+    expires_at:Date;
+    created_at:Date;
+}
+
 const registerUser = async (user:User) => {
     const rows =  await prisma.user.create({
         data:{
@@ -44,17 +49,22 @@ const deleteSession = async(id:number)=>{
     return rows
 }
 
+const deleteSessionByUserId = async(userid:number)=>{
+    const rows = await prisma.session.deleteMany({where:{user_id:userid}})
+    return rows
+}
+
+
 const getSession = async (id:number) => {
     const rows = await prisma.session.findFirst({where:{id:id}})
     return rows
 }
 
-const updateSession = async (id:number, session:Session) => {
+const updateSession = async (id:number, newsession:UpdateSession) => {
     const rows = await prisma.session.update({
         where:{id:id},
         data:{
-            expires_at: session.expires_at,
-            user_id: session.user_id,
+            expires_at: newsession.expires_at,
             created_at: new Date()
         }
     })
@@ -67,7 +77,7 @@ const authModels ={
     createSession,
     getSession,
     deleteSession,
-    updateSession
-    
+    updateSession,
+    deleteSessionByUserId,
 }
-export {User, Session, authModels }
+export {User, Session, UpdateSession,authModels }
