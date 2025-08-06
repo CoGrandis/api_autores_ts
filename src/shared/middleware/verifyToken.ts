@@ -6,7 +6,9 @@ import { authModels, Session } from 'src/auth/modules/authModels';
 const privateKey = env.PRIVATE_KEY
 function verifyToken (req:Request, res:Response, next:NextFunction ) {
         const cookieAuth = req.cookies['accessToken']        
-        if(!cookieAuth){
+        const refreshTokenCookie = req.cookies['refreshToken']
+
+        if(!cookieAuth || !refreshTokenCookie){
             throw new CustomError("Debe ingresar Token", 403);    
 
         }

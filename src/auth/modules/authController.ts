@@ -47,7 +47,7 @@ const loginUser =  async (req:Request, res:Response) => {
     const session = await authModels.createSession(newSession)
 
 
-    const accessToken = jwt.sign({ id: result.id, username : result.username }, privateKey, { expiresIn: '15m' });
+    const accessToken = jwt.sign({ id: result.id, username : result.username }, privateKey, { expiresIn: '10s' });
     const refreshToken = jwt.sign({ id: session.id }, privateKey, { expiresIn: '7d' });
 
 
