@@ -1,4 +1,4 @@
-import { User, authModels, RefreshToken} from "./authModels";
+import { User, authModels, Session} from "./authModels";
 import { Response, Request } from "express";
 import { env } from "src/env";
 import bcrypt from "bcrypt";
@@ -36,26 +36,28 @@ const loginUser =  async (req:Request, res:Response) => {
         throw new CustomError("Contraseña incorrecta",401)
 
     }
+
     const expires:Date = new Date();
-    expires.setDate(expires.getDate()+2)
-    const authToken:RefreshToken={
+    expires.setDate(expires.getDate()+7)
+    const newSession:Session={
         user_id:result.id,
-        expires_at: expires 
+        expires_at: expires,
+        created_at: new Date()
     }
-    const session = await authModels.addAuthToken(authToken)
+    const session = await authModels.createSession(newSession)
 
 
     const accessToken = jwt.sign({ id: result.id, username : result.username }, privateKey, { expiresIn: '15m' });
-    const refreshToken = jwt.sign({ id: session.id }, privateKey, { expiresIn: '2d' });
+    const refreshToken = jwt.sign({ id: session.id }, privateKey, { expiresIn: '7d' });
 
 
     res.cookie('accessToken', `Bearer ${accessToken}`, {
         httpOnly: true,
-        maxAge:1000*60*5,
+        maxAge:1000*60*15,
     })
     res.cookie('refreshToken', `Bearer ${refreshToken}`, {
         httpOnly: true,
-        maxAge:1000*60*60*48,
+        maxAge:1000*60*60*24*7,
     })
 
     res.json({Access_Token:`Bearer ${accessToken}`}) 
@@ -63,7 +65,6 @@ const loginUser =  async (req:Request, res:Response) => {
 }
 
 const logoutUser = async (req:Request, res:Response) => {
-    const accessToken = req.cookies["accessToken"];
     const refreshToken = req.cookies["refreshToken"].split(' ')[1];
     try {
     const payload =verify(refreshToken, privateKey) as JwtPayload;

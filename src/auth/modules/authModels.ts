@@ -6,9 +6,10 @@ interface User{
     password:string;
 }
 
-interface RefreshToken{
+interface Session{
     user_id:number;
     expires_at:Date;
+    created_at:Date;    
 }
 
 const registerUser = async (user:User) => {
@@ -26,25 +27,45 @@ const logUser = async (username:string) => {
     const rows = await prisma.user.findFirst({where:{username:username}})
     return rows
 }
-const addAuthToken = async(refreshToken:RefreshToken)=>{
-    const rows = await prisma.authToken.create({
+const createSession = async (session:Session) => {
+    const rows = await prisma.session.create({
         data:{
-            user_id:refreshToken.user_id,
-            expires_at:refreshToken.expires_at,
-            token:""
+            expires_at: session.expires_at,
+            user_id: session.user_id,
+            created_at: new Date()
         }
     })
     return rows
 }
+
+const updateSession = async (id:number, session:Session) => {
+    const rows = await prisma.session.update({
+        where:{id:id},
+        data:{
+            expires_at: session.expires_at,
+            user_id: session.user_id,
+            created_at: new Date()
+        }
+    })
+    return rows
+}
+
 const deleteSession = async(id:number)=>{
-    const rows = await prisma.authToken.delete({where:{id:id}})
+    const rows = await prisma.session.delete({where:{id:id}})
+    return rows
+}
+
+const getSession = async (id:number) => {
+    const rows = await prisma.session.findFirst({where:{id:id}})
     return rows
 }
 const authModels ={
     registerUser,
     logUser,
-    addAuthToken,
     deleteSession,
+    createSession,
+    updateSession,
+    getSession
 }
 
-export {User,RefreshToken, authModels }
+export {User,Session, authModels }
