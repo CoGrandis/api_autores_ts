@@ -44,7 +44,8 @@ const loginUser =  async (req:Request, res:Response) => {
     const newSession:Session={
         expires_at:expires,
         status:"Active",
-        user_id: user.id
+        user_id: user.id,
+        created_at: new Date()
     }
     const session = await authModels.createSession(newSession)
 
@@ -62,20 +63,18 @@ const loginUser =  async (req:Request, res:Response) => {
 }
 
 const logoutUser = async (req:Request, res:Response) => {
-    const refreshToken = req.cookies["refreshToken"];
-    if(!refreshToken){
-        throw new CustomError('No se pudo cerrar sesión correctamente', 400 )
-    }
-    
-    const token = refreshToken.split(' ')[1];
-    const payload =verify(token, privateKey) as JwtPayload;
+    const refreshToken = req.cookies["refreshToken"].split(' ')[1];
+    try {
+    const payload =verify(refreshToken, privateKey) as JwtPayload;
     console.log(payload)
     const id = payload.id
-
+    await authModels.deleteSession(id);
     res.clearCookie('accessToken', { httpOnly: true }); 
     res.clearCookie('refreshToken', { httpOnly: true });
- 
     res.status(200).json({message:"Sesión cerrada correctamente"})        
+    } catch (error:any) {
+        console.log(error)
+    }       
 }
 export const authController = {
     registerUser, 
