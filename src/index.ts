@@ -7,13 +7,15 @@ import { apiKeyAuth } from "@middleware/apiKeyAuth";
 import { errorHandler } from "@middleware/errorHandler";
 import { verifyToken } from "@middleware/verifyToken";
 import { error404 } from "@middleware/error404";
+import cors from "cors"
 const app = express();
 app.use(express.json())
 app.use(cookieParser())
+app.use(cors())
 app.use('/api/auth',authRouter)
 
-app.use(apiKeyAuth)
-app.use('/api/libro',verifyToken,libroRouter)
+// app.use(apiKeyAuth)
+app.use('/api/libro',libroRouter)
 app.use(error404)
 app.use(errorHandler)
 

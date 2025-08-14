@@ -6,7 +6,7 @@ interface Libro {
 }
 
 const getAll = async(limit:number, offset:number)=>{
-    return await prisma.libro.findMany({select:{titulo:true, categoria:{select:{categoria:true}}, user:{select:{username:true, email:true}}}, skip:offset, take:limit})
+    return await prisma.libro.findMany({select:{id:true,titulo:true, categoria:{select:{categoria:true}}, user:{select:{username:true}}}, skip:offset, take:limit})
 }
 
 const insertLibro = async (libro:Libro) => {
