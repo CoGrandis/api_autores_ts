@@ -22,13 +22,11 @@ model categoria {
 model libro {
   id          Int        @id @default(autoincrement())
   titulo      String?    @db.VarChar(255)
-  user_id     Int?
+  autor String
   categoriaId Int?
   categoria   categoria? @relation(fields: [categoriaId], references: [id])
-  user        user?      @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "libro_ibfk_1")
 
   @@index([categoriaId], map: "libro_categoriaId_fkey")
-  @@index([user_id], map: "user_id")
 }
 
 model user {
@@ -36,7 +34,6 @@ model user {
   email    String?
   username String?
   password String
-  libro    libro[]
   Session Session[]
 }
 

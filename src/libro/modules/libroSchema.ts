@@ -5,7 +5,7 @@ const routeParamsSchema= z.object({
 
 const bodyParamsSchema = z.object({
   titulo: z.string().min(1, "El titulo que ingrese debe contener mas de 1 caracter"),
-  user_id: z.coerce.number({error:"El id de usuario debe ser un numero entero"}),
+  autor:z.string().min(1, "El titulo que ingrese debe contener mas de 1 caracter"),
   categoriaId: z.coerce.number({error:"El id de categoria debe ser un numero entero"})
 });
 

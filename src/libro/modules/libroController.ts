@@ -18,11 +18,11 @@ const getLibros = async (req: Request, res: Response) => {
 }
 const insertLibro = async (req: Request, res: Response) => {
     try {
-        const {titulo, categoriaId, user_id} = req.body
+        const {titulo, categoriaId, autor} = req.body
         const libro:Libro = {
             titulo:titulo,
             categoriaId:categoriaId,
-            user_id:user_id
+            autor:autor
         }
         const libros= await libroModel.insertLibro(libro)
         res.status(201).json(libros)
@@ -51,11 +51,11 @@ const updateLibro = async (req: Request, res: Response) => {
     try {
 
         const {id} = req.params
-        const {titulo, categoriaId, user_id} = req.body
+        const {titulo, categoriaId, autor} = req.body
         const libro:Libro = {
             titulo:titulo,
             categoriaId:categoriaId,
-            user_id:user_id
+            autor:autor,
         }
         const libros= await libroModel.updateLibro(libro, parseInt(id))
         
